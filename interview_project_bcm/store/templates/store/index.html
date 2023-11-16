@@ -1,0 +1,48 @@
+<!-- store/templates/store/category_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Categories</title>
+
+    <style>
+    .product-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    .product {
+        border: 1px solid #ddd;
+        margin: 10px;
+        padding: 15px;
+        width: 300px;
+        text-align: center;
+    }
+    .product img {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+
+</head>
+<body>
+<!-- store/templates/store/index.html -->
+{% extends 'base.html' %}
+
+    {% block content %}
+    <div class="product-container">
+        {% for product in products %}
+            <div class="product">
+                <img src="{{ product.image }}" alt="{{ product.title }}">
+                <h2>{{ product.title }}</h2>
+                <p>{{ product.description }}</p>
+                <div>Price: ${{ product.price }}</div>
+                <div>Rating: {{ product.average_rating }} ({{ product.rating_count }} reviews)</div>
+            </div>
+        {% empty %}
+            <p>No products available.</p>
+        {% endfor %}
+    </div>
+    {% endblock content %}
+
+</body>
+</html>

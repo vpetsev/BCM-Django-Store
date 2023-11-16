@@ -1,0 +1,18 @@
+<!-- store/templates/store/new_purchase.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Purchase</title>
+</head>
+<body>
+{% extends 'base.html' %}
+    {% block content %}
+    <h1>New Purchase</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    {% endblock content %}
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!-- store/templates/store/purchase_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Purchase Report</title>
+</head>
+<body>
+{% extends 'base.html' %}
+
+    {% block content %}
+    <form method="get">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date">
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date">
+
+        <label for="category_id">Category:</label>
+        <select id="category_id" name="category_id">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.title }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Filter</button>
+    </form>
+
+    <h2>Total Revenue: ${{ total_revenue|floatformat:2 }}</h2>
+
+    <h3>Purchased Items</h3>
+    <ul>
+        {% for purchase in purchases %}
+            <li>
+                {{ purchase.quantity }} x {{ purchase.product.title }} (Price: ${{ purchase.product.price|floatformat:2 }}) - {{ purchase.purchase_date }}
+            </li>
+        {% empty %}
+            <li>No purchases in this period.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<body>
+
+{% extends 'base.html' %}
+
+    {% block content %}
+    <h1>Products in {{ category.title }}</h1>
+    <div class="item-container">
+        {% for product in products %}
+            <div class="item">
+                <img src="{{ product.image }}" alt="{{ product.title }}">
+                <h2>{{ product.title }}</h2>
+                <p>{{ product.description }}</p>
+                <div>Price: ${{ product.price|floatformat:2 }}</div>
+                <div>Rating: {{ product.average_rating }} ({{ product.rating_count }} reviews)</div>
+            </div>
+        {% empty %}
+            <p>No products in this category.</p>
+        {% endfor %}
+    </div>
+    {% endblock %}
+</body>
+</html>
