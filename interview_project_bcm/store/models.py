@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 
 
 class ProductCategory(models.Model):
@@ -25,9 +26,13 @@ class Product(models.Model):
 class Purchase(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     purchase_date = models.DateTimeField(auto_now_add=True)  # automatically set the field to now when the object is first created
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(quantity__gte=1), name='purchase_quantity_positive')
+        ]
 
     def __str__(self):
         return f'{self.quantity} of {self.product.title} by {self.user.username}'
