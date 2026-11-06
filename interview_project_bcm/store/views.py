@@ -2,11 +2,9 @@ from django.http import HttpResponse
 from .models import ProductCategory, Product, Purchase
 from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from .forms import PurchaseForm, CustomUserCreationForm
-
-import datetime
+from .forms import PurchaseForm, CustomUserCreationForm, PurchaseReportFilterForm
 
 def index(request):
     products = Product.objects.all()
@@ -21,7 +19,7 @@ def category_list(request):
 # View for displaying products in a specific category
 def product_list(request, category_id):
     products = Product.objects.filter(category_id=category_id)
-    category = ProductCategory.objects.get(id=category_id)
+    category = get_object_or_404(ProductCategory, id=category_id)
     return render(request, 'store/product_list.html', {'products': products, 'category': category})
 
 
@@ -29,18 +27,20 @@ def purchase_report(request):
     purchases = Purchase.objects.all()
     categories = ProductCategory.objects.all()
 
-    # Filter by datetime
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    if start_date and end_date:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-        purchases = purchases.filter(purchase_date__date__range=[start_date.date(), end_date.date()])
-
-    # Filter by category
-    category_id = request.GET.get('category_id')
-    if category_id:
-        purchases = purchases.filter(product__category__id=category_id)
+    filter_form = PurchaseReportFilterForm(request.GET)
+    valid_filters = filter_form.is_valid()
+    if valid_filters:
+        start_date = filter_form.cleaned_data['start_date']
+        end_date = filter_form.cleaned_data['end_date']
+        category = filter_form.cleaned_data['category_id']
+        if start_date:
+            purchases = purchases.filter(purchase_date__date__gte=start_date)
+        if end_date:
+            purchases = purchases.filter(purchase_date__date__lte=end_date)
+        if category:
+            purchases = purchases.filter(product__category=category)
+    else:
+        purchases = purchases.none()
 
     total_revenue = sum(purchase.product.price * purchase.quantity for purchase in purchases)
 
@@ -48,7 +48,8 @@ def purchase_report(request):
             'purchases': purchases,
             'categories': categories,
             'total_revenue': total_revenue,
-    })
+            'filter_form': filter_form,
+    }, status=200 if valid_filters else 400)
 
 def register(request):
     if request.method == 'POST':
